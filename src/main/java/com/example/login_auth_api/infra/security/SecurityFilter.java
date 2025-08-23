@@ -1,3 +1,4 @@
+package com.example.login_auth_api.infra.security;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -25,6 +26,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (request.getRequestURI().equals("/auth/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         var token = this.recoverToken(request);
         var login = tokenService.validateToken(token);
 
