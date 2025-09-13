@@ -33,11 +33,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Libera iframe para H2
                 .cors(cors -> {}) // 🔥 habilita CORS aqui
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()        // permite o POST de login de users
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()     //permite o POST de registro de users
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()   //permite a inspeção do SWAGGER
+                        .requestMatchers("/h2-console/**").permitAll()                      //permite a entrada no banco de dados H2
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
@@ -54,7 +57,7 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    // 🔥 Configuração de CORS válida para Angular
+    // Configuração de CORS válida para Angular
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
